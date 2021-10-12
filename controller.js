@@ -3,8 +3,9 @@ function setSize() {
     if (størrelse.value === "10") {width = 10;}
     if (størrelse.value === "12") {width = 12;}
     if (størrelse.value === "16") {width = 16;}
-    if (størrelse.value === "18") {width = 18;}
+    if (størrelse.value === "20") {width = 20;}
 }
+
 function setMines() {
     if (difficulity.value === "1") {
         mines = parseInt((5 * (width*width))/100);
@@ -20,6 +21,7 @@ function setMines() {
         mines = parseInt((20 * (width*width))/100);
         difficulty = "Expert";}
 }
+
 function startTime() {
     if (time = '-') return;
     time = setInterval(function(){
@@ -28,6 +30,7 @@ function startTime() {
     show();
     }, 1000);
 }
+
 function stopTime() {
     clearInterval(time);
     time = '-';
@@ -42,6 +45,7 @@ function newGame() {
     addNumbers();
     disable = "disabled";
     disable1 = "";
+    minesLeft = mines;
 show();
 }
 
@@ -53,8 +57,13 @@ function restart() {
     width = 0;
     mines = 0;
     difficulty = '-';
-
-    looseClass = "";
+    flagToggle = "false";
+    flagEnable = 'OFF';
+    wrong = 0;
+    flags = 0;
+    winLoose = '';
+    reveal = "false";
+    boardClass = "";
     disable = "";
     disable1 = "disabled";
 
@@ -69,145 +78,181 @@ function shuffle() {
         for (let i = 0; i < (mines); i++) {
             let object = {
                 id: "div"+i,
-                class: "mine",
-                i: i, 
+                class: 'mine',
+                // i: i, 
                 field: '',
             }
             mineArray.push(object);
         }
         for (let i = 0; i < ((width * width)-mines); i++) {
             let object = {
-                id: "div"+(width+i),
-                class: "valid",  
-                i: width+i,
+                id: "div"+(mines+i),
+                class: 'valid',  
+                // i: width+i,
                 field: '',
             }
             validArray.push(object);
         }   
     tempArray = validArray.concat(mineArray);
     shuffledArray = tempArray.sort(() => Math.random() - 0.5);
+   
 }
 
-function clicked(element, type, i) {
-    // endre style / farge
-    // bilde på mines? 
-    if (shuffledArray[i].class === "zero") return; 
-    if (shuffledArray[i].class === "field") return; 
-    if (shuffledArray[i].class === "boom") return; 
-    if (type === 0 && element.classList.contains("valid")) {
-        if (shuffledArray[i].totalMines === 1) return; 
-        if (shuffledArray[i].totalMines === 2) return; 
-        if (shuffledArray[i].totalMines === 3) return; 
-        if (shuffledArray[i].totalMines === 4) return; 
-        if (shuffledArray[i].totalMines === 5) return; 
-        if (shuffledArray[i].totalMines === 6) return; 
-        if (shuffledArray[i].totalMines === 7) return; 
-        if (shuffledArray[i].totalMines === 8) return; 
-        if (shuffledArray[i].totalMines === 99) return; 
-        if (shuffledArray[i].class === 'mine') return;
-        if (element.classList.contains('mine')) return;
+function clicked(element, totMines, index) {
+    if (flagEnable === 'ON') {
+        if (shuffledArray[index].class === 'valid') { 
+            wrong++;
+        }
+        shuffledArray[index].class = 'flagged';
+        flags++;   
+    }
         
-      else { open(element, type, i);
-        shuffledArray[i].class = "zero";
-     }   
+    if (flagEnable === 'OFF') {
+        if (shuffledArray[index].class === 'flagged') {
+            shuffledArray[index].class = 'valid'
+            element.classList.remove('flagged');
+            element.classList.add('valid');
+            element.click();
+            flags --;
+            wrong --;
+        }    
+            if (shuffledArray[index].class === 'zero') return; 
+            if (shuffledArray[index].class === 'field') return; 
+            if (shuffledArray[index].class === 'boom') return; 
+            if (totMines === 0) {
+                open(element, totMines, index);
+                shuffledArray[index].class = 'zero';
+            }   
+        
+            if (totMines >= 1 && totMines < 9) {
+                shuffledArray[index].class = 'field';
+                shuffledArray[index].field = totMines;
+            }
+            if ((element.classList.contains('mine')) || 
+                (shuffledArray[index].class === 'mine') || 
+                (totMines === 'mine')) {
+                //     //LEGG INN TAP FUNKSJON - Delay?
+                    shuffledArray[index].class = 'boom';
+                    boardClass = 'boardLock';
+                if (reveal === 'false') {
+                    revealMines()
+                    reveal = 'true';
+                    winLoose = 'GAME OVER'
+                }   
     }
-    if (type >= 1 && type < 9) {
-        shuffledArray[i].class = "field";
-        shuffledArray[i].field = type;
-    }
-     if (((type === 99) && 
-        (element.classList.contains('mine')) && 
-        (shuffledArray[i].totalMines === 99) &&
-        (shuffledArray[i].class === 'mine'))) {
-        //     //LEGG INN TAP FUNKSJON - Delay?
-        console.log("kjører")
-            shuffledArray[i].class = "boom";
-            loose();
-    }
-    
+} 
+minesLeft = (mines - flags);
+ if (minesLeft === 0) checkWin();
+
 show();
 }
-function flag(element){ 
-console.log("kjører")
+
+function flag() { 
+    flagToggle != "false" ? flagToggle = "false" : flagToggle = "true";
+    if (flagToggle == "true") {
+        flagEnable = 'ON';
+        boardClass = "boardFlag";
+    }
+    if (flagToggle == "false") {
+        flagEnable = 'OFF';
+        boardClass = "";
+    }    
+show();
 }
 
+function checkWin() {
+    if (minesLeft === 0) {
+        for (let i = 0; i < shuffledArray.length; i++) {
+            if (shuffledArray[i].class === 'mine') {
+                    winLoose = "Wrong flag(s)";         
+                }
+        }
+        if (wrong === 0) {
+            winLoose = '';
+            if (flags === mines) {
+                winLoose = "Congratulations!";
+                boardClass = 'boardLock';
+            }
+        }
+    } 
+}
 
+function revealMines() {
+    for (let i = 0; i < shuffledArray.length; i++) {
+        
+        if (shuffledArray[i].class === 'mine') {
+            setTimeout(function() {         
+                const newI = shuffledArray[i];
+                const checkedDiv = document.getElementById(newI.id);
+                checkedDiv.click();
+            }, 10) 
+        }        
+    }
+}
 
-function loose() {
-    // looseClass = 'boardLock';
-    // alert("Du Tapte. Trykk restart for nytt spill");
+function win() {
+   
+   
+    winner();
+
 }
 
 
 function addNumbers() {
 
-    for (let index = 0; index < shuffledArray.length; index++) {
+    for (let i = 0; i < shuffledArray.length; i++) {
         let totalMines = 0;
-        let leftSide = (index % width === 0);
-        let rightSide = (index % width === width - 1);
-       
-        if (shuffledArray[index].class === 'valid') {
+        let leftSide = (i % width === 0);
+        let rightSide = (i % width === width - 1);
+
+        if (shuffledArray[i].class === 'valid') {
         //Venstre    
-            if ((element =! leftSide) && (shuffledArray[index - 1].class === 'mine')) totalMines++; 
+            if ((element =! leftSide) && (shuffledArray[i - 1].class === 'mine')) totalMines++; 
         //Høyre    
-            if ((element =! rightSide) && (shuffledArray[index + 1].class === 'mine')) totalMines++; 
+            if ((element =! rightSide) && (shuffledArray[i + 1].class === 'mine')) totalMines++; 
         //Opp    
-            if ((index >= width) && (shuffledArray[index - width].class === 'mine')) totalMines++; 
+            if ((i >= width) && (shuffledArray[i - width].class === 'mine')) totalMines++; 
         //Ned    
-            if ((index < (width * width - width)) && 
-                (shuffledArray[index + width].class === 'mine')) totalMines++; 
+            if ((i < (width * width - width)) && 
+                (shuffledArray[i + width].class === 'mine')) totalMines++; 
         //Venstre Opp    
-            if ((index >= width) && (element =! leftSide) && 
-                (shuffledArray[index - 1 - width].class === 'mine')) totalMines++;
+            if ((i >= width) && (element =! leftSide) && 
+                (shuffledArray[i - 1 - width].class === 'mine')) totalMines++;
         //Høyre Opp    
-            if ((index >= width) && (element =! rightSide) && 
-                (shuffledArray[index + 1 - width].class === 'mine')) totalMines++; 
+            if ((i >= width) && (element =! rightSide) && 
+                (shuffledArray[i + 1 - width].class === 'mine')) totalMines++; 
         //Venstre Ned
-            if ((index < (width * width - width)) && (element =! leftSide) && 
-                (shuffledArray[index - 1 + width].class === 'mine')) totalMines++;
+            if ((i < (width * width - width)) && (element =! leftSide) && 
+                (shuffledArray[i - 1 + width].class === 'mine')) totalMines++;
         //Høyre Ned     
-            if ((index < (width * width - width)) && (element =! rightSide) && 
-                (shuffledArray[index + 1 + width].class === 'mine')) totalMines++; 
+            if ((i < (width * width - width)) && (element =! rightSide) && 
+                (shuffledArray[i + 1 + width].class === 'mine')) totalMines++; 
              
-        shuffledArray[index].totalMines = totalMines;
-        shuffledArray[index].i = index;
+        shuffledArray[i].totalMines = totalMines;
+        shuffledArray[i].i = i;
     }
-        if (shuffledArray[index].class === 'mine') {
-            shuffledArray[index].totalMines = '99';
-            shuffledArray[index].i = index;
+        if (shuffledArray[i].class === 'mine') {
+            shuffledArray[i].totalMines = 'mine';
+            shuffledArray[i].i = i;
         } 
           
     }
 show();    
 }
 
-function open(element, type, i) {
+function open(element, totMines, i) {
     
         let leftSide = (i % width === 0);
         let rightSide = (i % width === width - 1);
-        if (type === 0 && element.classList.contains("valid")) {
-            if (shuffledArray[i].class === "zero") return; 
-            if (shuffledArray[i].totalMines === '1') return; 
-            if (shuffledArray[i].totalMines === '2') return; 
-            if (shuffledArray[i].totalMines === '3') return; 
-            if (shuffledArray[i].totalMines === '4') return; 
-            if (shuffledArray[i].totalMines === '5') return; 
-            if (shuffledArray[i].totalMines === '6') return; 
-            if (shuffledArray[i].totalMines === '7') return; 
-            if (shuffledArray[i].totalMines === '8') return; 
-            if (shuffledArray[i].totalMines === '99') return;
-            if (shuffledArray[i].class === 'mine') return;
-            if (element.classList.contains("mine")) return;
-            else {
+       
+        if (totMines === 0 && element.classList.contains('valid')) {
+            
          setTimeout(function()  {    
-console.log("i", i)
-console.log("element", element)
-
             //Venstre    
                 if ((element =! leftSide) && (shuffledArray[i - 1].totalMines === 0)) {
                     const newI = shuffledArray[i - 1];
                     const checkedDiv = document.getElementById(newI.id);
-                    checkedDiv.click();
+                    checkedDiv.click();                   
                 } 
             //Høyre    
                 if ((element =! rightSide) && (shuffledArray[i + 1].totalMines === 0)) {
@@ -226,39 +271,39 @@ console.log("element", element)
                         (shuffledArray[i + width].totalMines === 0)) {
                             const newI = shuffledArray[i + width];
                             const checkedDiv = document.getElementById(newI.id);
-                            checkedDiv.click();
+                                checkedDiv.click();            
                 };
             //Venstre Opp    
                 if ((i >= width) && (element =! leftSide) && 
                     (shuffledArray[i - 1 - width].totalMines === 0)) {
                         const newI = shuffledArray[i - 1 - width];
                         const checkedDiv = document.getElementById(newI.id);
-                        checkedDiv.click();
-                };
+                            checkedDiv.click();
+                        };
             //Høyre Opp    
                 if ((i >= width) && (element =! rightSide) && 
                     (shuffledArray[i + 1 - width].totalMines === 0)) {
                         const newI = shuffledArray[i + 1 - width];
                         const checkedDiv = document.getElementById(newI.id);
-                        checkedDiv.click();
+                            checkedDiv.click();
                 };
             //Venstre Ned
                 if ((i < (width * width - width)) && (element =! leftSide) && 
                     (shuffledArray[i - 1 + width].totalMines === 0)) {
                         const newI = shuffledArray[i - 1 + width];
                         const checkedDiv = document.getElementById(newI.id);
-                        checkedDiv.click();
+                            checkedDiv.click();
                 };
             //Høyre Ned     
                 if ((i< (width * width - width)) && (element =! rightSide) && 
                     (shuffledArray[i + 1 + width].totalMines === 0)) {
                         const newI = shuffledArray[i + 1 + width];
                         const checkedDiv = document.getElementById(newI.id);
-                        checkedDiv.click();
-                };   
+                            checkedDiv.click();
+                };    
                 return;         
             }, 10)
-          }  
+           
         } 
     }
 
