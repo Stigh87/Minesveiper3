@@ -22,27 +22,27 @@ function setMines() {
         difficulty = "Expert";}
 }
 
-// async starttime.//await
 function startTime() {
-    
-    timer = setInterval(countTime, 1000);
-            async function countTime() {
-            seconds++;
-            // minutes = Math.floor((seconds)/60);
-            if (seconds >= 60) {
-             minutes++;       
-             seconds = 0;}
-            await show();    
-            }
+    if (time = '-') return;
+    time = setInterval(function(){
+        
+        time++; 
+    show();
+    }, 1000);
+}
+
+function stopTime() {
+    clearInterval(time);
+    time = '-';
 }
 
 function newGame() {
     setSize();
     setMines();
     if (mines === 0) return;
+    time = 0;
     shuffle();
     addNumbers();
-    startTime();
     disable = "disabled";
     disable1 = "";
     minesLeft = mines;
@@ -57,8 +57,6 @@ function restart() {
     width = 0;
     mines = 0;
     difficulty = '-';
-    seconds = 0;
-    minutes = 0;
     flagToggle = "false";
     flagEnable = 'OFF';
     wrong = 0;
@@ -68,7 +66,6 @@ function restart() {
     boardClass = "";
     disable = "";
     disable1 = "disabled";
-    clearInterval(timer);
 
 show();
 }
@@ -101,59 +98,51 @@ function shuffle() {
    
 }
 
-async function clicked(element, totMines, index) {
+function clicked(element, totMines, index) {
     if (flagEnable === 'ON') {
-        if (shuffledArray[index].class === 'flagged') {
-            shuffledArray[index].class = 'valid';
-            element.classList.remove('flagged');
-            element.classList.add('valid');
-            flags = flags -1;
-            wrong = wrong -1;
-        }
-        else if (flags >= mines) return;
-        else if (shuffledArray[index].class === 'valid') {
+        if (shuffledArray[index].class === 'valid') { 
             wrong++;
-            shuffledArray[index].class = 'flagged';
-            flags++;
         }
-        else if (shuffledArray[index].class === 'mine') {    
         shuffledArray[index].class = 'flagged';
-        flags++;
-        }
-    }    
+        flags++;   
+    }
+        
     if (flagEnable === 'OFF') {
         if (shuffledArray[index].class === 'flagged') {
-            shuffledArray[index].class = 'valid';
+            shuffledArray[index].class = 'valid'
             element.classList.remove('flagged');
             element.classList.add('valid');
             element.click();
-            flags = flags -1;
-            wrong = wrong -1;
+            flags --;
+            wrong --;
         }    
-        else if (totMines === 0) {
-            open(element, totMines, index);
-            shuffledArray[index].class = 'zero';
-        }   
-        else if (totMines >= 1 && totMines < 9) {
-            shuffledArray[index].class = 'field';
-            shuffledArray[index].field = totMines;
-        }
-        else if ((element.classList.contains('mine')) || 
-            (shuffledArray[index].class === 'mine') || 
-            (shuffledArray[index].totalMines === 'mine')) {
-            //     //LEGG INN TAP FUNKSJON - Delay?
-                shuffledArray[index].class = 'boom';
-                boardClass = 'boardLock';
-            if (reveal === 'false') {
-                revealMines()
-                reveal = 'true';
-                winLoose = 'GAME OVER'
-                clearInterval(timer);
+            if (shuffledArray[index].class === 'zero') return; 
+            if (shuffledArray[index].class === 'field') return; 
+            if (shuffledArray[index].class === 'boom') return; 
+            if (totMines === 0) {
+                open(element, totMines, index);
+                shuffledArray[index].class = 'zero';
             }   
+        
+            if (totMines >= 1 && totMines < 9) {
+                shuffledArray[index].class = 'field';
+                shuffledArray[index].field = totMines;
+            }
+            if ((element.classList.contains('mine')) || 
+                (shuffledArray[index].class === 'mine') || 
+                (totMines === 'mine')) {
+                //     //LEGG INN TAP FUNKSJON - Delay?
+                    shuffledArray[index].class = 'boom';
+                    boardClass = 'boardLock';
+                if (reveal === 'false') {
+                    revealMines()
+                    reveal = 'true';
+                    winLoose = 'GAME OVER'
+                }   
     }
 } 
-    minesLeft = (mines - flags);
-    if (minesLeft === 0) checkWin();
+minesLeft = (mines - flags);
+ if (minesLeft === 0) checkWin();
 
 show();
 }
@@ -173,22 +162,16 @@ show();
 
 function checkWin() {
     if (minesLeft === 0) {
-        let left = 0;
         for (let i = 0; i < shuffledArray.length; i++) {
             if (shuffledArray[i].class === 'mine') {
                     winLoose = "Wrong flag(s)";         
                 }
-            if (shuffledArray[i].class === 'valid') {
-                left++;
-            }
         }
         if (wrong === 0) {
             winLoose = '';
-            if ((flags === mines) && (left === 0)) {
-                
-                winLoose = "Congratulations!"+"<br>"+"Time:"+" "+minutes+"min"+" "+"&"+" "+seconds+"sec";
+            if (flags === mines) {
+                winLoose = "Congratulations!";
                 boardClass = 'boardLock';
-                clearInterval(timer);
             }
         }
     } 
@@ -206,6 +189,14 @@ function revealMines() {
         }        
     }
 }
+
+function win() {
+   
+   
+    winner();
+
+}
+
 
 function addNumbers() {
 
@@ -258,54 +249,54 @@ function open(element, totMines, i) {
             
          setTimeout(function()  {    
             //Venstre    
-                if ((element =! leftSide) && (shuffledArray[i - 1])) {
+                if ((element =! leftSide) && (shuffledArray[i - 1].totalMines === 0)) {
                     const newI = shuffledArray[i - 1];
                     const checkedDiv = document.getElementById(newI.id);
                     checkedDiv.click();                   
                 } 
             //Høyre    
-                if ((element =! rightSide) && (shuffledArray[i + 1])) {
+                if ((element =! rightSide) && (shuffledArray[i + 1].totalMines === 0)) {
                     const newI = shuffledArray[i + 1];
                     const checkedDiv = document.getElementById(newI.id);
                     checkedDiv.click();
                 }
             //Opp    
-                if ((i >= width) && (shuffledArray[i - width])) {
+                if ((i >= width) && (shuffledArray[i - width].totalMines === 0)) {
                     const newI = shuffledArray[i - width];
                     const checkedDiv = document.getElementById(newI.id);
                     checkedDiv.click();
                 };
             //Ned    
                 if ((i< (width * width - width)) && 
-                        (shuffledArray[i + width])) {
+                        (shuffledArray[i + width].totalMines === 0)) {
                             const newI = shuffledArray[i + width];
                             const checkedDiv = document.getElementById(newI.id);
                                 checkedDiv.click();            
                 };
             //Venstre Opp    
                 if ((i >= width) && (element =! leftSide) && 
-                    (shuffledArray[i - 1 - width])) {
+                    (shuffledArray[i - 1 - width].totalMines === 0)) {
                         const newI = shuffledArray[i - 1 - width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();
                         };
             //Høyre Opp    
                 if ((i >= width) && (element =! rightSide) && 
-                    (shuffledArray[i + 1 - width])) {
+                    (shuffledArray[i + 1 - width].totalMines === 0)) {
                         const newI = shuffledArray[i + 1 - width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();
                 };
             //Venstre Ned
                 if ((i < (width * width - width)) && (element =! leftSide) && 
-                    (shuffledArray[i - 1 + width])) {
+                    (shuffledArray[i - 1 + width].totalMines === 0)) {
                         const newI = shuffledArray[i - 1 + width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();
                 };
             //Høyre Ned     
                 if ((i< (width * width - width)) && (element =! rightSide) && 
-                    (shuffledArray[i + 1 + width])) {
+                    (shuffledArray[i + 1 + width].totalMines === 0)) {
                         const newI = shuffledArray[i + 1 + width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();

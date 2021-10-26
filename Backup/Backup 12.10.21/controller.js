@@ -22,18 +22,19 @@ function setMines() {
         difficulty = "Expert";}
 }
 
-// async starttime.//await
+
 function startTime() {
-    
     timer = setInterval(countTime, 1000);
-            async function countTime() {
+            function countTime() {
             seconds++;
-            // minutes = Math.floor((seconds)/60);
-            if (seconds >= 60) {
-             minutes++;       
-             seconds = 0;}
-            await show();    
+            minutes = Math.floor((seconds)/60);
+            show();    
             }
+}
+
+function stopTime() {
+    clearInterval(time);
+    time = '-';
 }
 
 function newGame() {
@@ -42,7 +43,7 @@ function newGame() {
     if (mines === 0) return;
     shuffle();
     addNumbers();
-    startTime();
+    startTime()
     disable = "disabled";
     disable1 = "";
     minesLeft = mines;
@@ -101,14 +102,14 @@ function shuffle() {
    
 }
 
-async function clicked(element, totMines, index) {
+function clicked(element, totMines, index) {
     if (flagEnable === 'ON') {
         if (shuffledArray[index].class === 'flagged') {
             shuffledArray[index].class = 'valid';
             element.classList.remove('flagged');
             element.classList.add('valid');
-            flags = flags -1;
-            wrong = wrong -1;
+            flags--;
+            wrong--;
         }
         else if (flags >= mines) return;
         else if (shuffledArray[index].class === 'valid') {
@@ -127,8 +128,8 @@ async function clicked(element, totMines, index) {
             element.classList.remove('flagged');
             element.classList.add('valid');
             element.click();
-            flags = flags -1;
-            wrong = wrong -1;
+            flags --;
+            wrong --;
         }    
         else if (totMines === 0) {
             open(element, totMines, index);
@@ -185,8 +186,7 @@ function checkWin() {
         if (wrong === 0) {
             winLoose = '';
             if ((flags === mines) && (left === 0)) {
-                
-                winLoose = "Congratulations!"+"<br>"+"Time:"+" "+minutes+"min"+" "+"&"+" "+seconds+"sec";
+                winLoose = "Congratulations!"+"<br>"+"Time:"+seconds;
                 boardClass = 'boardLock';
                 clearInterval(timer);
             }
@@ -258,54 +258,54 @@ function open(element, totMines, i) {
             
          setTimeout(function()  {    
             //Venstre    
-                if ((element =! leftSide) && (shuffledArray[i - 1])) {
+                if ((element =! leftSide) && (shuffledArray[i - 1].totalMines === 0)) {
                     const newI = shuffledArray[i - 1];
                     const checkedDiv = document.getElementById(newI.id);
                     checkedDiv.click();                   
                 } 
             //Høyre    
-                if ((element =! rightSide) && (shuffledArray[i + 1])) {
+                if ((element =! rightSide) && (shuffledArray[i + 1].totalMines === 0)) {
                     const newI = shuffledArray[i + 1];
                     const checkedDiv = document.getElementById(newI.id);
                     checkedDiv.click();
                 }
             //Opp    
-                if ((i >= width) && (shuffledArray[i - width])) {
+                if ((i >= width) && (shuffledArray[i - width].totalMines === 0)) {
                     const newI = shuffledArray[i - width];
                     const checkedDiv = document.getElementById(newI.id);
                     checkedDiv.click();
                 };
             //Ned    
                 if ((i< (width * width - width)) && 
-                        (shuffledArray[i + width])) {
+                        (shuffledArray[i + width].totalMines === 0)) {
                             const newI = shuffledArray[i + width];
                             const checkedDiv = document.getElementById(newI.id);
                                 checkedDiv.click();            
                 };
             //Venstre Opp    
                 if ((i >= width) && (element =! leftSide) && 
-                    (shuffledArray[i - 1 - width])) {
+                    (shuffledArray[i - 1 - width].totalMines === 0)) {
                         const newI = shuffledArray[i - 1 - width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();
                         };
             //Høyre Opp    
                 if ((i >= width) && (element =! rightSide) && 
-                    (shuffledArray[i + 1 - width])) {
+                    (shuffledArray[i + 1 - width].totalMines === 0)) {
                         const newI = shuffledArray[i + 1 - width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();
                 };
             //Venstre Ned
                 if ((i < (width * width - width)) && (element =! leftSide) && 
-                    (shuffledArray[i - 1 + width])) {
+                    (shuffledArray[i - 1 + width].totalMines === 0)) {
                         const newI = shuffledArray[i - 1 + width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();
                 };
             //Høyre Ned     
                 if ((i< (width * width - width)) && (element =! rightSide) && 
-                    (shuffledArray[i + 1 + width])) {
+                    (shuffledArray[i + 1 + width].totalMines === 0)) {
                         const newI = shuffledArray[i + 1 + width];
                         const checkedDiv = document.getElementById(newI.id);
                             checkedDiv.click();

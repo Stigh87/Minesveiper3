@@ -13,9 +13,7 @@ const newId = '';
 let size = width*width;
 
 let field = '';
-let timer = 0;
-let seconds = 0;
-let minutes = 0;
+let time = 0;
 let difficulty = '-';
 let minesLeft = 0;
 let wrong = 0;

@@ -10,7 +10,7 @@ let html = '';
                         ${mines}<br>
                         </br>
                         Time: </br>
-                        ${minutes} min: ${seconds} sec<br>
+                        ${minutes}:${seconds}<br>
                         </br>
                         
                         </br>
@@ -47,7 +47,7 @@ let html = '';
                 Mines Left:</br>
                 ${minesLeft}
                 <br>
-                </div>`;
+                </div>`
 
         html += `<div id="board" class="${boardClass}">`
         let index = -1;
@@ -63,6 +63,6 @@ let html = '';
         }
         html += `</div>
                         <div id="winLoose">${winLoose}</div>
-        `;
+        `
         appDiv.innerHTML = html;
         }

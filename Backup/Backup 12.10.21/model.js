@@ -13,7 +13,6 @@ const newId = '';
 let size = width*width;
 
 let field = '';
-let timer = 0;
 let seconds = 0;
 let minutes = 0;
 let difficulty = '-';
